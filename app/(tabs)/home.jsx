@@ -1,18 +1,36 @@
-import { View, Text, FlatList, Image } from 'react-native'
+import { View, Text, FlatList, Image, RefreshControl } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '../../constants'
 import SearchInput from '../../components/SearchInput'
+import Trending from '../../components/Trending'
+import EmptyState from '../../components/EmptyState'
+import { useState } from 'react'
+import { getAllPost } from '../../lib/appwrite'
+import useAppWrite from '../../lib/useAppwrite'
 const Home = () => {
+    const { data: posts, isLoading, refetch } = useAppWrite(getAllPost)
+    const [refreshing, setRefreshing] = useState(false)
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+        await refetch()
+        setRefreshing(false)
+    }
+    console.log(posts)
     return (
-        <SafeAreaView className='bg-primary'>
+        <SafeAreaView className='bg-primary h-full'>
             <FlatList
-                data={[]}
+                data={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+                // this for assignment of automatic key
                 keyExtractor={(item) => item.$id}
+                // render the data
+
                 renderItem={({ item }) => (
-                    <Text className='text-whote'>{item.id}</Text>
+                    <Text className='text-white'>{item.id}</Text>
                 )}
+                // this is basically the header of the list
                 ListHeaderComponent={() => (
-                    <View className='my-6 px-4 space-x-6'>
+                    <View className='my-6 px-4 -y-6'>
                         <View className='justify-between items flex-row mb-6'>
                             <View>
                                 <Text className='font-pmedium text-sm text-gray-100'>
@@ -33,13 +51,30 @@ const Home = () => {
 
                         <SearchInput />
 
-                        <View className=' bg-red-400'>
-                            <Text className=' text-gray-100 font-pregular text-lg'>
+                        <View className='w-full flex-1 pt-5  pb-8'>
+                            <Text className='mb-3 text-gray-100 font-pregular text-lg'>
                                 Latest Videos
                             </Text>
+                            <Trending
+                                posts={[{ id: 1 }, { id: 2 }, { id: 3 }] ?? []}
+                            />
                         </View>
                     </View>
                 )}
+                // if list has not item what we should display
+                ListEmptyComponent={() => (
+                    <EmptyState
+                        title='No videos found !'
+                        subtitle='Be the first one to upload a video '
+                    />
+                )}
+                // apply refresh functionality when we scroll to the top
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
             />
         </SafeAreaView>
     )
