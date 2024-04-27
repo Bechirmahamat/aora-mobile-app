@@ -5,10 +5,14 @@ import SearchInput from '../../components/SearchInput'
 import Trending from '../../components/Trending'
 import EmptyState from '../../components/EmptyState'
 import { useState } from 'react'
-import { getAllPost } from '../../lib/appwrite'
+import { getAllPost, getLatestPost } from '../../lib/appwrite'
 import useAppWrite from '../../lib/useAppwrite'
+import VideoCard from '../../components/VideoCard'
+import { StatusBar } from 'expo-status-bar'
 const Home = () => {
     const { data: posts, isLoading, refetch } = useAppWrite(getAllPost)
+    const { data: LatestPosts, isLoading: isFetchingLatest } =
+        useAppWrite(getLatestPost)
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = async () => {
@@ -16,18 +20,17 @@ const Home = () => {
         await refetch()
         setRefreshing(false)
     }
-    console.log(posts)
+    if (isLoading || isFetchingLatest) return <Text>Loading....</Text>
+    // console.log(posts)
     return (
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
-                data={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+                data={posts}
                 // this for assignment of automatic key
                 keyExtractor={(item) => item.$id}
                 // render the data
 
-                renderItem={({ item }) => (
-                    <Text className='text-white'>{item.id}</Text>
-                )}
+                renderItem={({ item }) => <VideoCard video={item} />}
                 // this is basically the header of the list
                 ListHeaderComponent={() => (
                     <View className='my-6 px-4 -y-6'>
@@ -55,9 +58,7 @@ const Home = () => {
                             <Text className='mb-3 text-gray-100 font-pregular text-lg'>
                                 Latest Videos
                             </Text>
-                            <Trending
-                                posts={[{ id: 1 }, { id: 2 }, { id: 3 }] ?? []}
-                            />
+                            <Trending posts={LatestPosts ?? []} />
                         </View>
                     </View>
                 )}
@@ -76,6 +77,7 @@ const Home = () => {
                     />
                 }
             />
+            <StatusBar style='light' />
         </SafeAreaView>
     )
 }

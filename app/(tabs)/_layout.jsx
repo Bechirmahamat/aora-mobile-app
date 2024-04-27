@@ -48,7 +48,7 @@ const TabsLayout = () => {
                                 color={color}
                                 name='Home'
                                 focused={focused}
-                            />
+                            /> 
                         ),
                     }}
                 />
