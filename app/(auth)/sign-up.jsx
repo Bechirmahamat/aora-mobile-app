@@ -6,7 +6,9 @@ import CustomBottom from '../../components/CustomBottom'
 import { useState } from 'react'
 import { Link, router } from 'expo-router'
 import { createUser } from '../../lib/appwrite'
+import { useGlobalContext } from '../../GlobalContext'
 const SignUp = () => {
+    const { user, setUser } = useGlobalContext()
     const [form, setForm] = useState({ email: '', username: '', password: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const handleSubmit = async () => {
@@ -17,11 +19,9 @@ const SignUp = () => {
         }
         setIsSubmitting(true)
         try {
-            const result = await createUser(
-                form.email,
-                form.password,
-                form.username
-            )
+            await createUser(form.email, form.password, form.username)
+            const result = await getCurrentUser()
+            setUser(result)
             router.replace('/home')
         } catch (error) {
             Alert.alert('Error', error.message)

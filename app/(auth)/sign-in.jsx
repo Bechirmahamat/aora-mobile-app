@@ -5,8 +5,10 @@ import FormField from '../../components/FormField'
 import CustomBottom from '../../components/CustomBottom'
 import { useState } from 'react'
 import { Link, router } from 'expo-router'
-import { signIn } from '../../lib/appwrite'
+import { getCurrentUser, signIn } from '../../lib/appwrite'
+import { useGlobalContext } from '../../GlobalContext'
 const SignIn = () => {
+    const { user, setUser } = useGlobalContext()
     const [form, setForm] = useState({ email: '', password: '' })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const handleSubmit = async () => {
@@ -17,7 +19,7 @@ const SignIn = () => {
         setIsSubmitting(true)
         try {
             const result = await signIn(form.email, form.password)
-            console.log(result)
+            setUser(result)
             router.replace('/home')
         } catch (error) {
             Alert.alert('Error', error.message)

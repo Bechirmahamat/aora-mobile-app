@@ -4,21 +4,31 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import SearchInput from '../../components/SearchInput'
 import EmptyState from '../../components/EmptyState'
 import { useEffect } from 'react'
-import { getUserPost } from '../../lib/appwrite'
+import { getUserPost, uesLogout } from '../../lib/appwrite'
 import useAppWrite from '../../lib/useAppwrite'
 import VideoCard from '../../components/VideoCard'
 import { StatusBar } from 'expo-status-bar'
 
 import { useGlobalContext } from '../../GlobalContext'
 import { icons } from '../../constants'
+import InfoBox from '../../components/InfoBox'
+import { router } from 'expo-router'
 const Profile = () => {
     const { user, setUser, isLogged, setIsLogged } = useGlobalContext()
+
     const {
         data: posts,
         isLoading,
         refetch,
-    } = useAppWrite(() => getUserPost(user.$id))
-    const logout = () => {}
+    } = useAppWrite(() => getUserPost(user?.$id))
+
+    const logout = async () => {
+        await uesLogout()
+        setUser(null)
+
+        router.replace('/sign-in')
+    }
+
     if (isLoading) return <Text>Loading....</Text>
 
     return (
@@ -26,7 +36,7 @@ const Profile = () => {
             <FlatList
                 data={posts}
                 // this for assignment of automatic key
-                keyExtractor={(item) => item.$id}
+                keyExtractor={(item) => item?.$id}
                 // render the data
 
                 renderItem={({ item }) => <VideoCard video={item} />}
@@ -43,44 +53,32 @@ const Profile = () => {
                                 resizeMode='contain'
                             />
                         </TouchableOpacity>
-                        <View className='border rounded-lg border-secondary-200 h-16 overflow-hidden w-16'>
+                        <View className='border rounded-lg border-secondary-100 h-16 overflow-hidden w-16'>
                             <Image
                                 source={{ uri: user?.avatar }}
                                 className='w-full h-full '
                                 resizeMode='cover'
                             />
                         </View>
+                        <InfoBox
+                            title={user?.username}
+                            containerStyle={'mt-5'}
+                            titleStyle='text-lg'
+                        />
+                        <View className='mt-5 flex-row'>
+                            <InfoBox
+                                title={posts?.length || 0}
+                                containerStyle={'mr-10'}
+                                titleStyle='text-xl'
+                                subtitle='posts'
+                            />
+                            <InfoBox
+                                title='1.2k'
+                                subtitle='Followers'
+                                titleStyle='text-xl'
+                            />
+                        </View>
                     </View>
-                    // <View className='my-6 flex-col justify-center items-center relative'>
-                    //     <View className='border rounded-lg border-secondary-200 h-16 overflow-hidden w-16'>
-                    //         <Image
-                    //             source={{ uri: user.avatar }}
-                    //             className='w-full h-full '
-                    //             resizeMode='contain'
-                    //         />
-                    //     </View>
-                    //     <Text className='text-xl font-psemibold capitalize my-1 text-white'>
-                    //         {user.username}
-                    //     </Text>
-                    //     <View className='flex-row gap-5 '>
-                    //         <View className='flex-col items-center justify-center'>
-                    //             <Text className='text-3xl font-semibold text-white'>
-                    //                 10
-                    //             </Text>
-                    //             <Text className='text-lg text-white'>
-                    //                 Posts
-                    //             </Text>
-                    //         </View>
-                    //         <View className='flex-col items-center justify-center'>
-                    //             <Text className='text-3xl font-semibold text-white'>
-                    //                 1.2K
-                    //             </Text>
-                    //             <Text className='text-lg text-white'>
-                    //                 Views
-                    //             </Text>
-                    //         </View>
-                    //     </View>
-                    // </View>
                 )}
                 // if list has not item what we should display
                 ListEmptyComponent={() => (
